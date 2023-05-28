@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import DepositWithdraw from './DepositeWithdraw'
+import LoginPage from './login'
 
 function App() {
   const [state, setState] = useState({})
@@ -11,7 +13,7 @@ function App() {
   }
   return (
     <div style={{ display:"flex", flexDirection:"column",gap:"10px", }}>
-      <DepositWithdraw />
+      <LoginPage />
       {/* <input type="text" name="deposit" onChange={handleChange} placeholder="deposer de l'argent" style={{padding:"10px"}} />
       <input type="text" name="withdraw" onChange={handleChange} placeholder="recuperer de l'argent" style={{padding:"10px"}} />
       <input type="text" name="borrow" onChange={handleChange} placeholder="emprunter de l'argent" style={{padding:"10px"}} />
