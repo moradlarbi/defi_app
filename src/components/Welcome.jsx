@@ -1,35 +1,98 @@
-import React, { useContext } from "react";
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
+import React, { useContext ,useState, useEffect } from "react";
 import { AiFillPlayCircle } from "react-icons/ai";
 import { SiEthereum } from "react-icons/si";
 import { BsInfoCircle } from "react-icons/bs";
+import Web3 from 'web3';
+import abi from '../../poolfront.abi';
 
-import { TransactionContext } from "../context/TransactionContext";
-import { shortenAddress } from "../utils/shortenAddress";
-import { Loader } from ".";
+
 
 const companyCommonStyles = "min-h-[70px] sm:px-0 px-2 sm:min-w-[120px] flex justify-center items-center border-[0.5px] border-gray-400 text-sm font-light text-white";
 
-const Input = ({ placeholder, name, type, value, handleChange }) => (
+const Input = ({ placeholder, name, type, value, handleChange  , disabaled}) => (
   <input
     placeholder={placeholder}
     type={type}
     step="0.0001"
+    disabled={disabaled ? true : false}
     value={value}
-    onChange={(e) => handleChange(e, name)}
+    onChange={(e) => handleChange(e.target.value)}
     className="my-2 w-full rounded-sm p-2 outline-none bg-transparent text-white border-none text-sm white-glassmorphism"
   />
 );
-
 const Welcome = () => {
- // const { currentAccount, connectWallet, handleChange, sendTransaction, formData, isLoading } = useContext(TransactionContext);
 
-  const handleSubmit = () => {
-  
+const [web3, setWeb3] = useState(null);
+const [account, setAccount] = useState(null);
+const [contract, setContract] = useState(null);
+const [balanceD, setBalanceD] = useState(0);
+const [depositAmount, setDepositAmount] = useState('');
+const [withdrawAmount, setWithdrawAmount] = useState('');
+
+useEffect(() => {
+  // Initialize web3
+  const initWeb3 = async () => {
+    if (window.ethereum) {
+      const web3Instance = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      setWeb3(web3Instance);
+    }
   };
 
-  const handleChange = () => {
-  
+  initWeb3();
+}, []);
+
+useEffect(() => {
+  const loadBlockchainData = async () => {
+    if (web3) {
+      const accounts = await web3.eth.getAccounts();
+      var v = await web3.eth.getBalance(accounts[0]); 
+      setBalanceD(v)
+      console.log("balance",v)
+      console.log(accounts)
+      setAccount(accounts[0]);
+      const contractABI = abi
+      const contractAddress = '0x07094aF1B8fC3B5f3456ba285975a81747730333';
+      const contractInstance = new web3.eth.Contract(contractABI, contractAddress);
+      setContract(contractInstance);
+
+      const balance = await contractInstance.methods.getBalance().call({ gas: 3000000 });
+      setBalanceD(web3.utils.fromWei(balance.toString(), 'ether'));
+
+    }
   };
+
+  loadBlockchainData();
+}, [web3]);
+
+const handleDeposit = async () => {
+  if (contract && depositAmount) {
+    await contract.methods.deposit().send({
+      from: account,
+      value: web3.utils.toWei(depositAmount, 'ether'),
+    });
+
+    const newBalance = await contract.methods.getBalance().call();
+    setBalanceD(web3.utils.fromWei(newBalance.toString(), 'ether'));
+    setDepositAmount('');
+  }
+};
+
+const handleWithdraw = async () => {
+  if (contract && withdrawAmount) {
+    await contract.methods.withdraw(web3.utils.toWei(withdrawAmount, 'ether')).send({
+      from: account,
+    });
+
+    const newBalance = await contract.methods.getBalance().call();
+    setBalanceD(web3.utils.fromWei(newBalance.toString(), 'ether'));
+    setWithdrawAmount('');
+  }
+};
+
+
 
 
   return (
@@ -71,6 +134,8 @@ const Welcome = () => {
               Blockchain
             </div>
           </div>
+
+
         </div>
 
         <div className="flex flex-col flex-1 items-center justify-start w-full mf:mt-0 mt-10">
@@ -79,6 +144,9 @@ const Welcome = () => {
               <div className="flex justify-between items-start">
                 <div className="w-10 h-10 rounded-full border-2 border-white flex justify-center items-center">
                   <SiEthereum fontSize={21} color="#fff" />
+                </div>
+                <div className=" text-white font-semibold ">
+                  {web3 && web3.utils.fromWei(balanceD.toString(), 'ether')} ETH
                 </div>
                 <BsInfoCircle fontSize={17} color="#fff" />
               </div>
@@ -93,11 +161,11 @@ const Welcome = () => {
             </div>
           </div>
           <div className="p-5 sm:w-96 w-full flex justify-start items-center blue-glassmorphism">
-            <Input placeholder="Deposit amount ETH" name="addressTo" type="text" handleChange={handleChange} />
+            <Input placeholder="Deposit amount ETH" name="addressTo" type="text" handleChange={setDepositAmount} />
           
             <button
                   type="button"
-                  onClick={handleSubmit}
+                  onClick={handleDeposit}
                   className="text-white w-200 p-2 bg-[#3d4f7c] cursor-pointer text-[13px] "
                 >
                   Deposit
@@ -109,13 +177,10 @@ const Welcome = () => {
 
 
           <div className="p-5 mt-6 sm:w-96 w-full flex justify-start items-center blue-glassmorphism">
-            <Input placeholder="Withdraw amount ETH" name="addressTo" type="text" handleChange={handleChange} />
-
-
-          
-                <button
+            <Input placeholder="Withdraw amount ETH" name="addressTo" type="text" handleChange={setWithdrawAmount} />
+            <button
                   type="button"
-                  onClick={handleSubmit}
+                  onClick={handleWithdraw}
                   className="text-white w-200 p-2 bg-[#3d4f7c] cursor-pointer text-[13px] "
                 >
                   Withdraw

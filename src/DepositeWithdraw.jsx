@@ -31,8 +31,6 @@ const DepositWithdraw = () => {
         setBalanceD(v)
         console.log(accounts)
         setAccount(accounts[0]);
-        
-
         const contractABI = abi
         const contractAddress = '0x477505920c3435DeB0e8b71982C0c453893c0261';
         const contractInstance = new web3.eth.Contract(contractABI, contractAddress);

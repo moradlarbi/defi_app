@@ -1,13 +1,13 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable no-unused-vars */
 import React, { useContext } from "react";
 
-import { TransactionContext } from "../context/TransactionContext";
 
-import useFetch from "../hooks/useFetch";
 import dummyData from "../utils/dummyData";
 import { shortenAddress } from "../utils/shortenAddress";
 
 const TransactionsCard = ({ addressTo, addressFrom, timestamp, message, keyword, amount, url }) => {
-  const gifUrl = useFetch({ keyword });
+
 
   return (
     <div className="bg-[#181918] m-4 flex flex-1
