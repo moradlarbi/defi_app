@@ -32,12 +32,13 @@ const DepositWithdraw = () => {
         console.log(accounts)
         setAccount(accounts[0]);
         const contractABI = abi
-        const contractAddress = '0x477505920c3435DeB0e8b71982C0c453893c0261';
+        const contractAddress = '0xf2fd35690EA8ff25C1826c3416b6AD96d3d2FA95';
         const contractInstance = new web3.eth.Contract(contractABI, contractAddress);
         setContract(contractInstance);
 
         const balance = await contractInstance.methods.getBalance().call({ gas: 3000000 });
         setBalanceD(web3.utils.fromWei(balance.toString(), 'ether'));
+        console.log(balance)
 
       }
     };

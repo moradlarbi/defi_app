@@ -50,17 +50,13 @@ useEffect(() => {
       const accounts = await web3.eth.getAccounts();
       var v = await web3.eth.getBalance(accounts[0]); 
       setBalanceD(v)
-      console.log("balance",v)
-      console.log(accounts)
       setAccount(accounts[0]);
       const contractABI = abi
-      const contractAddress = '0x07094aF1B8fC3B5f3456ba285975a81747730333';
+      const contractAddress = '0xf2fd35690EA8ff25C1826c3416b6AD96d3d2FA95';
       const contractInstance = new web3.eth.Contract(contractABI, contractAddress);
       setContract(contractInstance);
 
-      const balance = await contractInstance.methods.getBalance().call({ gas: 3000000 });
-      setBalanceD(web3.utils.fromWei(balance.toString(), 'ether'));
-
+      
     }
   };
 
@@ -74,26 +70,35 @@ const handleDeposit = async () => {
       value: web3.utils.toWei(depositAmount, 'ether'),
     });
 
-    const newBalance = await contract.methods.getBalance().call();
-    setBalanceD(web3.utils.fromWei(newBalance.toString(), 'ether'));
+    const accounts = await web3.eth.getAccounts();
+    var v = await web3.eth.getBalance(accounts[0]); 
+    setBalanceD(v)
     setDepositAmount('');
   }
 };
 
 const handleWithdraw = async () => {
   if (contract && withdrawAmount) {
-    await contract.methods.withdraw(web3.utils.toWei(withdrawAmount, 'ether')).send({
-      from: account,
-    });
-
-    const newBalance = await contract.methods.getBalance().call();
-    setBalanceD(web3.utils.fromWei(newBalance.toString(), 'ether'));
-    setWithdrawAmount('');
+    try {
+      await contract.methods.withdraw(web3.utils.toWei(withdrawAmount, 'ether')).send({
+        from: account,
+      });
+  
+      const accounts = await web3.eth.getAccounts();
+      var v = await web3.eth.getBalance(accounts[0]); 
+      setBalanceD(v)
+      setWithdrawAmount('');
+    }
+    catch(error) {
+      console.log(error)
+    }
   }
 };
 
 
-
+useEffect(() => {
+ 
+}, [depositAmount, withdrawAmount])
 
   return (
     <div className="flex w-full justify-center items-center">
@@ -146,7 +151,7 @@ const handleWithdraw = async () => {
                   <SiEthereum fontSize={21} color="#fff" />
                 </div>
                 <div className=" text-white font-semibold ">
-                  {web3 && web3.utils.fromWei(balanceD.toString(), 'ether')} ETH
+                {web3 && web3.utils.fromWei(balanceD.toString(), 'ether')} ETH
                 </div>
                 <BsInfoCircle fontSize={17} color="#fff" />
               </div>
@@ -161,7 +166,7 @@ const handleWithdraw = async () => {
             </div>
           </div>
           <div className="p-5 sm:w-96 w-full flex justify-start items-center blue-glassmorphism">
-            <Input placeholder="Deposit amount ETH" name="addressTo" type="text" handleChange={setDepositAmount} />
+            <Input placeholder="Deposit amount ETH" name="addressTo" type="number" value={depositAmount} handleChange={setDepositAmount} />
           
             <button
                   type="button"
@@ -177,7 +182,7 @@ const handleWithdraw = async () => {
 
 
           <div className="p-5 mt-6 sm:w-96 w-full flex justify-start items-center blue-glassmorphism">
-            <Input placeholder="Withdraw amount ETH" name="addressTo" type="text" handleChange={setWithdrawAmount} />
+            <Input placeholder="Withdraw amount ETH" name="addressTo" type="number" value={withdrawAmount} handleChange={setWithdrawAmount} />
             <button
                   type="button"
                   onClick={handleWithdraw}

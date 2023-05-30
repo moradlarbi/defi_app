@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import './App.css'
+import DepositWithdraw from './DepositeWithdraw';
 
 
 import { Navbar, Welcome, Footer, Services, Transactions } from "./components";
